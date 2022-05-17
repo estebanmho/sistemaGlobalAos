@@ -1,0 +1,133 @@
+version: "3"
+services:
+
+  proxyCliente:
+      image: caddy
+      container_name: clientes_proxy
+      volumes:
+          - ./SubsistemaCliente/Caddyfile:/etc/caddy/Caddyfile
+      ports:
+          - 85:80
+      depends_on:
+          - backendCliente
+  backendCliente:
+      image: stoplight/prism:4
+      container_name: clientes_mock
+      command: mock --cors -h 0.0.0.0 "/aos/clientes.yaml"
+      ports:
+        - 4015:4010
+      volumes:
+          - ./SubsistemaCliente/OpenApi:/aos:ro
+      depends_on:
+        - backendLogs
+        - backendVehiculos
+
+
+  backendFacturas:
+      image: stoplight/prism:4
+      container_name: facturas_mock
+      command: mock --cors -h 0.0.0.0 "/aos/esp.yml"
+      ports:
+        - "4011:4010"
+      volumes:
+          - ./SubsistemaFacturas/openapi:/aos:ro1
+      depends_on:
+        - backendLogs
+        - backendTrabajos
+        - backendCliente
+  proxyFacturas:
+      image: caddy:latest
+      container_name: facturas_proxy
+      volumes:
+          - ./SubsistemaFacturas/Caddyfile:/etc/caddy/Caddyfile
+      ports:
+          - "81:80"
+      depends_on:
+          - backendFacturas
+
+  backendLogs:
+      image: stoplight/prism:4
+      container_name: logs_mock
+      command: mock --cors -h 0.0.0.0 "/aos/openapi.yaml"
+      ports:
+        - "4012:4010"
+      volumes:
+          - ./SubsistemaLogs/openapi:/aos:ro2
+      
+  proxyLogs:
+      image: caddy:latest
+      container_name: logs_proxy
+      volumes:
+          - ./SubsistemaLogs/Caddyfile:/etc/caddy/Caddyfile
+      ports:
+          - "82:80"
+      depends_on:
+          - backendLogs
+        
+  backendNotificaciones:
+      image: stoplight/prism:4
+      container_name: notificaciones_mock
+      command: mock --cors -h 0.0.0.0 "/aos/notificaciones.yaml"
+      ports:
+        - "4013:4010"
+      volumes:
+          - ./SubsistemaNotificaciones/openapi:/aos:ro3
+      depends_on:
+        - backendLogs
+        - backendCliente
+  proxyNotificaciones:
+      image: caddy:latest
+      container_name: notificaciones_proxy
+      volumes:
+          - ./SubsistemaNotificaciones/Caddyfile:/etc/caddy/Caddyfile
+      ports:
+          - "83:80"
+      depends_on:
+          - backendNotificaciones
+  
+  backendRecambios:
+      image: stoplight/prism:4
+      container_name: recambios_mock
+      command: mock --cors -h 0.0.0.0 "/aos/openapi.yaml"
+      ports:
+        - "4014:4010"
+      volumes:
+          - ./SubsistemaRecambios/openapi-recambios:/aos:ro4
+      depends_on:
+        - backendLogs
+        - backendVehiculos
+  proxyRecambios:
+      image: caddy:latest
+      container_name: Recambios_proxy
+      volumes:
+          - ./SubsistemaRecambios/Caddyfile:/etc/caddy/Caddyfile
+      ports:
+          - "84:80"
+      depends_on:
+          - backendRecambios
+
+  backendVehiculos:
+      image: esteban23/gestionvehiculosaos:v1
+      container_name: vehiculosBack
+      ports:
+        - "4010:5000"
+      volumes:
+          - ./SubsistemaVehiculos:/usr/src/app/:ro5
+      depends_on:
+        - backendLogs
+  
+  backendTrabajos:
+      image: esteban23/trabajos:v1
+      container_name: trabajosBack
+      ports:
+        - "4016:3000"
+      volumes:
+          - ./SubsistemaTrabajos:/aos:ro7
+      depends_on:
+        - backendLogs
+        - backendRecambios
+        - backendNotificaciones
+        - backendVehiculos
+
+  
+  

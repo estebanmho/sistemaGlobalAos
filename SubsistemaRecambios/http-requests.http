@@ -1,0 +1,345 @@
+########
+# /recambios
+########
+
+###
+# OPTIONS 204
+OPTIONS http://127.0.0.1:80/api/v1/recambios
+Accept: application/json
+
+###
+# CGET 200
+GET http://127.0.0.1:80/api/v1/recambios
+Accept: application/json
+
+###
+# CGET 304 (caché válida)
+GET http://127.0.0.1:80/api/v1/recambios
+If-None-Match: 33a64df551425fcc
+Prefer: code=304
+Accept: application/problem+json
+
+###
+# CGET 200 (caché no válida)
+GET http://127.0.0.1:80/api/v1/recambios
+If-None-Match: a1b2c3d4e5f6
+Accept: application/json
+
+###
+# CGET 400 (consulta incorrecta (limit < 0))
+GET http://127.0.0.1:80/api/v1/recambios?limit=-1
+Accept: application/json
+
+###
+# CGET 400 (consulta incorrecta (page < 1))
+GET http://127.0.0.1:80/api/v1/recambios?page=0
+Accept: application/json
+
+###
+# CGET 404 (No existen recambios registrados)
+GET http://127.0.0.1:80/api/v1/recambios
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# POST 201
+POST http://127.0.0.1:80/api/v1/recambios
+Accept: application/json
+Content-Type: application/json
+
+{
+  "nombre": "Neumático: Continental VancoCamper 215/70 R15CP 109R 8PR",
+  "descripcion": "Neumático para coche",
+  "proveedor": "Continental VancoCamper",
+  "modelo": "215/70 R15CP 109R 8PR",
+  "cantidad": 20,
+  "vehiculos_compatibles": [
+    "Hyundai IONIQ Híbrido",
+    "Hyundai i30 Fastback"
+  ],
+  "peso": 5,
+  "dimensiones": {
+    "alto": 40,
+    "ancho": 40,
+    "largo": 20
+  },
+  "precio": 80.0
+}
+
+###
+# POST 400 (Falta campo requerido (nombre))
+POST http://127.0.0.1:80/api/v1/recambios
+Accept: application/json
+Content-Type: application/json
+
+{
+  "descripcion": "Neumático para coche",
+  "proveedor": "Continental VancoCamper",
+  "modelo": "215/70 R15CP 109R 8PR",
+  "cantidad": 20,
+  "vehiculos_compatibles": [
+    "Hyundai IONIQ Híbrido",
+    "Hyundai i30 Fastback"
+  ],
+  "peso": 5,
+  "dimensiones": {
+    "alto": 40,
+    "ancho": 40,
+    "largo": 20
+  },
+  "precio": 80.0
+}
+
+###
+# POST 400 (Valor incorrecto (peso no integer))
+POST http://127.0.0.1:80/api/v1/recambios
+Accept: application/json
+Content-Type: application/json
+
+{
+  "nombre": "Neumático: Continental VancoCamper 215/70 R15CP 109R 8PR",
+  "descripcion": "Neumático para coche",
+  "proveedor": "Continental VancoCamper",
+  "modelo": "215/70 R15CP 109R 8PR",
+  "cantidad": 20,
+  "vehiculos_compatibles": [
+    "Hyundai IONIQ Híbrido",
+    "Hyundai i30 Fastback"
+  ],
+  "peso": "pesado",
+  "dimensiones": {
+    "alto": 40,
+    "ancho": 40,
+    "largo": 20
+  },
+  "precio": 80.0
+}
+
+###
+# POST 409 (Ya existe un recambio con esa combinación de nombre + proveedor + modelo)
+POST http://127.0.0.1:80/api/v1/recambios
+Accept: application/problem+json
+Prefer: code=409
+Content-Type: application/json
+
+{
+  "nombre": "Neumático: Continental VancoCamper 215/70 R15CP 109R 8PR",
+  "descripcion": "Neumático para coche",
+  "proveedor": "Continental VancoCamper",
+  "modelo": "215/70 R15CP 109R 8PR",
+  "cantidad": 20,
+  "vehiculos_compatibles": [
+    "Hyundai IONIQ Híbrido",
+    "Hyundai i30 Fastback"
+  ],
+  "peso": 5,
+  "dimensiones": {
+    "alto": 40,
+    "ancho": 40,
+    "largo": 20
+  },
+  "precio": 80.0
+}
+
+########
+# /recambios/{recambioId}
+########
+
+###
+# OPTIONS 204
+OPTIONS http://127.0.0.1:80/api/v1/recambios/2022
+Accept: application/json
+
+###
+# GET 200
+GET http://127.0.0.1:80/api/v1/recambios/2022
+Accept: application/json
+
+###
+# GET 404 (No existe el recambio)
+GET http://127.0.0.1:80/api/v1/recambios/2023
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# PUT 200
+GET http://127.0.0.1:80/api/v1/recambios/2022
+If-Match: 33a64df551425fcc
+Accept: application/json
+#Content-Type: application/json
+
+{
+  "peso": 10
+}
+
+###
+# PUT 404 (No existe el recambio)
+PUT http://127.0.0.1:80/api/v1/recambios/2023
+If-Match: a1b2c3d4e5f6
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# PUT 412 (ETag no válido)
+PUT http://127.0.0.1:80/api/v1/recambios/2022
+If-Match: a1b2c3d4e5f6
+Prefer: code=412
+Accept: application/problem+json
+
+###
+# DELETE 204 (Eliminado)
+DELETE http://127.0.0.1:80/api/v1/recambios/2022
+Accept: application/json
+
+###
+# DELETE 404 (No existe el recambio)
+DELETE http://127.0.0.1:80/api/v1/recambios/2023
+Prefer: code=404
+Accept: application/problem+json
+
+########
+# /recambios/{recambioId}/equivalencias
+########
+
+###
+# OPTIONS 204
+OPTIONS http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+Accept: application/json
+
+###
+# CGET 200
+GET http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+Accept: application/json
+
+###
+# CGET 304 (caché válida)
+GET http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+If-None-Match: 33a64df551425fcc
+Prefer: code=304
+Accept: application/problem+json
+
+###
+# CGET 200 (caché no válida)
+GET http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+If-None-Match: a1b2c3d4e5f6
+Accept: application/json
+
+###
+# CGET 404 (No existe el recambio)
+GET http://127.0.0.1:80/api/v1/recambios/2023/equivalencias
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# CGET 404 (No tiene recambios equivalentes)
+GET http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# POST 201
+POST http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+Content-Type: application/json
+
+{
+  "recambioEquivalenteId": 2022
+}
+
+###
+# POST 400 (Id equivalente no existe)
+POST http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+Prefer: code=400
+Content-Type: application/json
+
+{
+  "recambioEquivalenteId": 2023
+}
+
+###
+# POST 400 (Id equivalente inválido)
+POST http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+Content-Type: application/json
+
+{
+  "recambioEquivalenteId": "Neumático"
+}
+
+###
+# POST 404 (No existe el recambio)
+POST http://127.0.0.1:80/api/v1/recambios/2023/equivalencias
+Prefer: code=404
+Content-Type: application/json
+
+{
+  "recambioEquivalenteId": 2022
+}
+
+###
+# POST 409 (Los recambios ya eran equivalentes)
+POST http://127.0.0.1:80/api/v1/recambios/2020/equivalencias
+Prefer: code=409
+Content-Type: application/json
+
+{
+  "recambioEquivalenteId": 2022
+}
+
+########
+# /recambios/{recambioId}/equivalencias/{recambioEquivalenteId}
+########
+
+###
+# OPTIONS 204
+OPTIONS http://127.0.0.1:80/api/v1/recambios/2020/equivalencias/2022
+Accept: application/json
+
+###
+# GET 200
+GET http://127.0.0.1:80/api/v1/recambios/2020/equivalencias/2022
+Accept: application/json
+
+###
+# GET 404 (Alguno de los recambios no existe)
+GET http://127.0.0.1:80/api/v1/recambios/2023/equivalencias/2022
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# GET 404 (Los recambios no son equivalentes)
+GET http://127.0.0.1:80/api/v1/recambios/2020/equivalencias/2022
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# HEAD 200
+HEAD http://127.0.0.1:80/api/v1/recambios/2020/equivalencias/2022
+Accept: application/json
+
+###
+# HEAD 404 (Alguno de los recambios no existe)
+HEAD http://127.0.0.1:80/api/v1/recambios/2023/equivalencias/2022
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# HEAD 404 (Los recambios no son equivalentes)
+HEAD http://127.0.0.1:80/api/v1/recambios/2020/equivalencias/2022
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# DELETE 204
+DELETE http://127.0.0.1:80/api/v1/recambios/2020/equivalencias/2022
+Accept: application/json
+
+###
+# DELETE 404 (Alguno de los recambios no existe)
+DELETE http://127.0.0.1:80/api/v1/recambios/2023/equivalencias/2022
+Prefer: code=404
+Accept: application/problem+json
+
+###
+# DELETE 404 (Los recambios no son equivalentes)
+DELETE http://127.0.0.1:80/api/v1/recambios/2020/equivalencias/2022
+Prefer: code=404
+Accept: application/problem+json

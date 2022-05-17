@@ -1,0 +1,8 @@
+http://127.0.0.1
+
+route /api/v1/* {
+	uri strip_prefix /api/v1
+	reverse_proxy facturas_mock:4011
+}
+
+
